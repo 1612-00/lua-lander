@@ -3,13 +3,17 @@ using UnityEngine.SceneManagement;
 
 public static class SceneLoader {
 
+
+
     public enum Scene {
         MainMenuScene,
         GameScene,
-        GameOverScene
+        GameOverScene,
     }
+
 
     public static void LoadScene(Scene scene) {
         SceneManager.LoadScene(scene.ToString());
     }
+
 }

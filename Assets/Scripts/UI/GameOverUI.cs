@@ -3,8 +3,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GameOverUI : MonoBehaviour {
+
+
+
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private TextMeshProUGUI scoreTextMesh;
+
 
     private void Awake() {
         mainMenuButton.onClick.AddListener(() => {
@@ -17,4 +21,5 @@ public class GameOverUI : MonoBehaviour {
 
         mainMenuButton.Select();
     }
+
 }

@@ -1,47 +1,34 @@
-using System;
 using UnityEngine;
 
 public class LanderAudio : MonoBehaviour {
+
+
     [SerializeField] private AudioSource thrusterAudioSource;
 
+
     private Lander lander;
+
 
     private void Awake() {
         lander = GetComponent<Lander>();
     }
 
     private void Start() {
-        lander.OnLeftForce += Lander_OnLeftForce;
+        lander.OnBeforeForce += Lander_OnBeforeForce;
         lander.OnUpForce += Lander_OnUpForce;
         lander.OnRightForce += Lander_OnRightForce;
-        lander.OnBeforeForce += Lander_OnBeforeForce;
+        lander.OnLeftForce += Lander_OnLeftForce;
 
         SoundManager.Instance.OnSoundVolumeChanged += SoundManager_OnSoundVolumeChanged;
-        MusicManager.Instance.OnMusicVolumeChanged += MusicManager_OnMusicVolumeChanged;
 
         thrusterAudioSource.Pause();
     }
 
-    private void MusicManager_OnMusicVolumeChanged(object sender, EventArgs e) {
-        // Do nothing for now, but this is where you would handle music volume changes if needed
-    }
-
-    private void SoundManager_OnSoundVolumeChanged(object sender, EventArgs e) {
+    private void SoundManager_OnSoundVolumeChanged(object sender, System.EventArgs e) {
         thrusterAudioSource.volume = SoundManager.Instance.GetSoundVolumeNormalized();
     }
 
-    private void Lander_OnBeforeForce(object sender, System.EventArgs e) {
-        thrusterAudioSource.Pause();
-    }
-
     private void Lander_OnLeftForce(object sender, System.EventArgs e) {
-        if (!thrusterAudioSource.isPlaying) {
-            thrusterAudioSource.Play();
-        }
-
-    }
-
-    private void Lander_OnUpForce(object sender, System.EventArgs e) {
         if (!thrusterAudioSource.isPlaying) {
             thrusterAudioSource.Play();
         }
@@ -52,4 +39,15 @@ public class LanderAudio : MonoBehaviour {
             thrusterAudioSource.Play();
         }
     }
+
+    private void Lander_OnUpForce(object sender, System.EventArgs e) {
+        if (!thrusterAudioSource.isPlaying) {
+            thrusterAudioSource.Play();
+        }
+    }
+
+    private void Lander_OnBeforeForce(object sender, System.EventArgs e) {
+        thrusterAudioSource.Pause();
+    }
+
 }

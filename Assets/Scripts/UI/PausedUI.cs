@@ -1,9 +1,10 @@
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PauseUI : MonoBehaviour {
+public class PausedUI : MonoBehaviour {
+
+
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button soundVolumeButton;
@@ -11,17 +12,18 @@ public class PauseUI : MonoBehaviour {
     [SerializeField] private Button musicVolumeButton;
     [SerializeField] private TextMeshProUGUI musicVolumeTextMesh;
 
+
     private void Awake() {
         soundVolumeButton.onClick.AddListener(() => {
             SoundManager.Instance.ChangeSoundVolume();
-            soundVolumeTextMesh.text = "SOUND " + SoundManager.Instance.GetSoundVolume().ToString();
+            soundVolumeTextMesh.text = "SOUND " + SoundManager.Instance.GetSoundVolume();
         });
         musicVolumeButton.onClick.AddListener(() => {
             MusicManager.Instance.ChangeMusicVolume();
-            musicVolumeTextMesh.text = "MUSIC " + MusicManager.Instance.GetMusicVolume().ToString();
+            musicVolumeTextMesh.text = "MUSIC " + MusicManager.Instance.GetMusicVolume();
         });
         resumeButton.onClick.AddListener(() => {
-            GameManager.Instance.UnPauseGame();
+            GameManager.Instance.UnpauseGame();
         });
         mainMenuButton.onClick.AddListener(() => {
             SceneLoader.LoadScene(SceneLoader.Scene.MainMenuScene);
@@ -32,29 +34,27 @@ public class PauseUI : MonoBehaviour {
         GameManager.Instance.OnGamePaused += GameManager_OnGamePaused;
         GameManager.Instance.OnGameUnpaused += GameManager_OnGameUnpaused;
 
-        soundVolumeTextMesh.text = "SOUND " + SoundManager.Instance.GetSoundVolume().ToString();
-        musicVolumeTextMesh.text = "MUSIC " + MusicManager.Instance.GetMusicVolume().ToString();
-
-        resumeButton.Select();
-        mainMenuButton.Select();
-
+        soundVolumeTextMesh.text = "SOUND " + SoundManager.Instance.GetSoundVolume();
+        musicVolumeTextMesh.text = "MUSIC " + MusicManager.Instance.GetMusicVolume();
         Hide();
     }
 
-    private void GameManager_OnGameUnpaused(object sender, EventArgs e) {
+    private void GameManager_OnGameUnpaused(object sender, System.EventArgs e) {
         Hide();
     }
 
-    private void GameManager_OnGamePaused(object sender, EventArgs e) {
+    private void GameManager_OnGamePaused(object sender, System.EventArgs e) {
         Show();
     }
 
     private void Show() {
         gameObject.SetActive(true);
+
         resumeButton.Select();
     }
 
     private void Hide() {
         gameObject.SetActive(false);
     }
+
 }

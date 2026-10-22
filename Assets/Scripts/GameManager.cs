@@ -6,10 +6,13 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
+
     public static GameManager Instance { get; private set; }
+
 
     private static int levelNumber = 1;
     private static int totalScore = 0;
+
 
     public static void ResetStaticData() {
         levelNumber = 1;
@@ -17,21 +20,20 @@ public class GameManager : MonoBehaviour {
     }
 
 
+    public event EventHandler OnGamePaused;
+    public event EventHandler OnGameUnpaused;
+
+
     [SerializeField] private List<GameLevel> gameLevelList;
     [SerializeField] private CinemachineCamera cinemachineCamera;
 
-    public event EventHandler OnGamePaused;
-    public event EventHandler OnGameUnpaused;
 
     private int score;
     private float time;
     private bool isTimerActive;
 
+
     private void Awake() {
-        if (Instance != null) {
-            Destroy(gameObject);
-            return;
-        }
         Instance = this;
     }
 
@@ -41,17 +43,11 @@ public class GameManager : MonoBehaviour {
         Lander.Instance.OnStateChanged += Lander_OnStateChanged;
 
         GameInput.Instance.OnMenuButtonPressed += GameInput_OnMenuButtonPressed;
-
         LoadCurrentLevel();
     }
 
-    private void GameInput_OnMenuButtonPressed(object sender, EventArgs e) {
-        if (Time.timeScale == 1f) {
-            PauseGame();
-        }
-        else {
-            UnPauseGame();
-        }
+    private void GameInput_OnMenuButtonPressed(object sender, System.EventArgs e) {
+        PauseUnpauseGame();
     }
 
     private void Lander_OnStateChanged(object sender, Lander.OnStateChangedEventArgs e) {
@@ -59,7 +55,7 @@ public class GameManager : MonoBehaviour {
 
         if (e.state == Lander.State.Normal) {
             cinemachineCamera.Target.TrackingTarget = Lander.Instance.transform;
-            CinemachineCameraZoom2D.Instance.SetNormalOrthorgraphicSize();
+            CinemachineCameraZoom2D.Instance.SetNormalOrthographicSize();
         }
     }
 
@@ -69,16 +65,34 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void Lander_OnCoinPickup(object sender, System.EventArgs e) {
-        AddScore(500);
+    private void LoadCurrentLevel() {
+        GameLevel gameLevel = GetGameLevel();
+        GameLevel spawnedGameLevel = Instantiate(gameLevel, Vector3.zero, Quaternion.identity);
+        Lander.Instance.transform.position = spawnedGameLevel.GetLanderStartPosition();
+        cinemachineCamera.Target.TrackingTarget = spawnedGameLevel.GetCameraStartTargetTransform();
+        CinemachineCameraZoom2D.Instance.SetTargetOrthographicSize(spawnedGameLevel.GetZoomedOutOrthographicSize());
+    }
+
+    private GameLevel GetGameLevel() {
+        foreach (GameLevel gameLevel in gameLevelList) {
+            if (gameLevel.GetLevelNumber() == levelNumber) {
+                return gameLevel;
+            }
+        }
+        return null;
     }
 
     private void Lander_OnLanded(object sender, Lander.OnLandedEventArgs e) {
         AddScore(e.score);
     }
 
-    public void AddScore(int amount) {
-        score += amount;
+    private void Lander_OnCoinPickup(object sender, System.EventArgs e) {
+        AddScore(500);
+    }
+
+    public void AddScore(int addScoreAmount) {
+        score += addScoreAmount;
+        Debug.Log(score);
     }
 
     public int GetScore() {
@@ -89,42 +103,8 @@ public class GameManager : MonoBehaviour {
         return time;
     }
 
-    public int GetLevel() {
-        return levelNumber;
-    }
-
-    private void LoadCurrentLevel() {
-        GameLevel gameLevel = GetGameLevel();
-        if (gameLevel == null) {
-            Debug.LogError($"No GameLevel configured for level {levelNumber}. Check the Game Manager level list.");
-            return;
-        }
-
-        GameLevel spawnedGameLevel = Instantiate(gameLevel);
-        Lander.Instance.transform.position = spawnedGameLevel.GetLanderSpawnPosition();
-        cinemachineCamera.Target.TrackingTarget = spawnedGameLevel.GetCameraStartTargetTransform();
-        CinemachineCameraZoom2D.Instance.SetTargetOrthorgraphicSize(spawnedGameLevel.GetZoomedOutOrthographicSize());
-    }
-
-    private GameLevel GetGameLevel() {
-        foreach (GameLevel gameLevel in gameLevelList) {
-            if (gameLevel.GetLevelNumber() == levelNumber) {
-                return gameLevel;
-
-            }
-        }
-        return null;
-    }
-
     public int GetTotalScore() {
         return totalScore;
-    }
-
-    public static void StartNewGame() {
-        levelNumber = 1;
-        totalScore = 0;
-        Time.timeScale = 1f;
-        SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
     }
 
     public void GoToNextLevel() {
@@ -132,9 +112,10 @@ public class GameManager : MonoBehaviour {
         totalScore += score;
 
         if (GetGameLevel() == null) {
+            // No more levels
             SceneLoader.LoadScene(SceneLoader.Scene.GameOverScene);
-        }
-        else {
+        } else {
+            // We still have more levels
             SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
         }
     }
@@ -143,13 +124,26 @@ public class GameManager : MonoBehaviour {
         SceneLoader.LoadScene(SceneLoader.Scene.GameScene);
     }
 
+    public int GetLevelNumber() {
+        return levelNumber;
+    }
+
+    public void PauseUnpauseGame() {
+        if (Time.timeScale == 1f) {
+            PauseGame();
+        } else {
+            UnpauseGame();
+        }
+    }
+
     public void PauseGame() {
         Time.timeScale = 0f;
         OnGamePaused?.Invoke(this, EventArgs.Empty);
     }
 
-    public void UnPauseGame() {
+    public void UnpauseGame() {
         Time.timeScale = 1f;
         OnGameUnpaused?.Invoke(this, EventArgs.Empty);
     }
+
 }
