@@ -63,25 +63,25 @@ public class Lander : MonoBehaviour {
 
 		switch (state) {
 			case State.WaitingToStart:
-				if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed || Keyboard.current.rightArrowKey.isPressed) {
+				if (GameInput.Instance.IsUpActionPressed() || GameInput.Instance.IsLeftActionPressed() || GameInput.Instance.IsRightActionPressed()) {
 					landerRigidbody2D.gravityScale = GRAVITY_NORMAL;
 					SetState(State.Normal);
 				}
 				break;
 			case State.Normal:
 				if (fuelAmount > 0f) {
-					if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed || Keyboard.current.rightArrowKey.isPressed) {
+					if (GameInput.Instance.IsUpActionPressed() || GameInput.Instance.IsLeftActionPressed() || GameInput.Instance.IsRightActionPressed()) {
 						ConsumeFuel();
 					}
-					if (Keyboard.current.upArrowKey.isPressed) {
+					if (GameInput.Instance.IsUpActionPressed()) {
 						landerRigidbody2D.AddForce(THRUST_FORCE * transform.up);
 						OnUpForce?.Invoke(this, EventArgs.Empty);
 					}
-					if (Keyboard.current.leftArrowKey.isPressed) {
+					if (GameInput.Instance.IsLeftActionPressed()) {
 						landerRigidbody2D.AddTorque(ROTATION_TORQUE);
 						OnLeftForce?.Invoke(this, EventArgs.Empty);
 					}
-					if (Keyboard.current.rightArrowKey.isPressed) {
+					if (GameInput.Instance.IsRightActionPressed()) {
 						landerRigidbody2D.AddTorque(-ROTATION_TORQUE);
 						OnRightForce?.Invoke(this, EventArgs.Empty);
 					}
