@@ -17,6 +17,7 @@ public class Lander : MonoBehaviour {
 	public event EventHandler OnRightForce;
 	public event EventHandler OnBeforeForce;
 	public event EventHandler OnCoinPickup;
+	public event EventHandler OnFuelPickup;
 	public event EventHandler<OnStateChangedEventArgs> OnStateChanged;
 	public class OnStateChangedEventArgs : EventArgs {
 		public State state;
@@ -171,6 +172,7 @@ public class Lander : MonoBehaviour {
 			if (fuelAmount > fuelAmountMax) {
 				fuelAmount = fuelAmountMax;
 			}
+			OnFuelPickup?.Invoke(this, EventArgs.Empty);
 			fuelPickup.DestroySelf();
 		}
 
