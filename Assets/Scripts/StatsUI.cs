@@ -23,7 +23,8 @@ public class StatsUI : MonoBehaviour {
 
         fuelBarImage.fillAmount = Lander.Instance.GetFuelAmountNomalized();
 
-        statsText.text = GameManager.Instance.GetScore() + "\n" +
+        statsText.text = GameManager.Instance.GetLevel() + "\n" +
+            GameManager.Instance.GetScore() + "\n" +
             Mathf.Abs(Mathf.RoundToInt(GameManager.Instance.GetTime())) + "s\n" +
             Mathf.RoundToInt(Lander.Instance.GetSpeedX()) + "\n" +
             Mathf.RoundToInt(Lander.Instance.GetSpeedY());

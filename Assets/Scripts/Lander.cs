@@ -4,7 +4,11 @@ using UnityEngine.InputSystem;
 
 public class Lander : MonoBehaviour {
 
-	private const float GRAVITY_NORMAL = 0.7f;
+	private const float GRAVITY_NORMAL = 0.5f;
+	private const float THRUST_FORCE = 10f;
+	private const float ROTATION_TORQUE = 1.5f;
+	private const float MAX_LINEAR_SPEED = 6f;
+	private const float MAX_ANGULAR_SPEED = 90f;
 
 	public static Lander Instance { get; private set; }
 
@@ -65,26 +69,22 @@ public class Lander : MonoBehaviour {
 				}
 				break;
 			case State.Normal:
-				if (fuelAmount <= 0f) {
-					return;
-				}
-				if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed || Keyboard.current.rightArrowKey.isPressed) {
-					ConsumeFuel();
-				}
-				if (Keyboard.current.upArrowKey.isPressed) {
-					float force = 700f;
-					landerRigidbody2D.AddForce(force * transform.up * Time.deltaTime);
-					OnUpForce?.Invoke(this, EventArgs.Empty);
-				}
-				if (Keyboard.current.leftArrowKey.isPressed) {
-					float turnSpeed = +100f;
-					landerRigidbody2D.AddTorque(turnSpeed * Time.deltaTime);
-					OnLeftForce?.Invoke(this, EventArgs.Empty);
-				}
-				if (Keyboard.current.rightArrowKey.isPressed) {
-					float turnSpeed = -100f;
-					landerRigidbody2D.AddTorque(turnSpeed * Time.deltaTime);
-					OnRightForce?.Invoke(this, EventArgs.Empty);
+				if (fuelAmount > 0f) {
+					if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.leftArrowKey.isPressed || Keyboard.current.rightArrowKey.isPressed) {
+						ConsumeFuel();
+					}
+					if (Keyboard.current.upArrowKey.isPressed) {
+						landerRigidbody2D.AddForce(THRUST_FORCE * transform.up);
+						OnUpForce?.Invoke(this, EventArgs.Empty);
+					}
+					if (Keyboard.current.leftArrowKey.isPressed) {
+						landerRigidbody2D.AddTorque(ROTATION_TORQUE);
+						OnLeftForce?.Invoke(this, EventArgs.Empty);
+					}
+					if (Keyboard.current.rightArrowKey.isPressed) {
+						landerRigidbody2D.AddTorque(-ROTATION_TORQUE);
+						OnRightForce?.Invoke(this, EventArgs.Empty);
+					}
 				}
 				break;
 			case State.GameOver:
@@ -93,6 +93,13 @@ public class Lander : MonoBehaviour {
 				break;
 		}
 
+		landerRigidbody2D.linearVelocity = Vector2.ClampMagnitude(
+			landerRigidbody2D.linearVelocity,
+			MAX_LINEAR_SPEED);
+		landerRigidbody2D.angularVelocity = Mathf.Clamp(
+			landerRigidbody2D.angularVelocity,
+			-MAX_ANGULAR_SPEED,
+			MAX_ANGULAR_SPEED);
 
 	}
 
@@ -183,7 +190,7 @@ public class Lander : MonoBehaviour {
 
 	private void ConsumeFuel() {
 		const float fuelConsumptionRate = 1f;
-		fuelAmount -= fuelConsumptionRate * Time.deltaTime;
+		fuelAmount -= fuelConsumptionRate * Time.fixedDeltaTime;
 		Debug.Log($"Fuel Amount: {fuelAmount}");
 	}
 
